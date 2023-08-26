@@ -117,7 +117,6 @@ def get_performance_list(start_date, c_page, rows, to_get_total_page=False):
     
     # API 호출
     response = requests.get(url, params=params)
-    print("List의 결과 : " + response.text)
     json_dict = json.loads(response.text)
     
     if to_get_total_page:
@@ -126,13 +125,10 @@ def get_performance_list(start_date, c_page, rows, to_get_total_page=False):
     ## 행사 리스트를 반복하면서 행사의 상세정보를 조회해서 dataframe에 추가 
     for item in json_dict['response']['body']['items']['item']:
         festival = FestivalBase(item)
-        #time.sleep(0.5)
         festival_detail = get_festival_detail(festival.contentid)  
-        #time.sleep(0.5)
-        # 공통정보 가져오기 
-        #(summary, description) = get_festival_event_info(festival.contentid) 
-        (summary, description) = ("test", "test")
         # 반복정보 가져오기 
+        (summary, description) = get_festival_event_info(festival.contentid) 
+        
         # 추가이미지 가져오기 
         image_list = get_festival_additional_image(festival.contentid)
         
@@ -185,8 +181,8 @@ def get_festival_detail(content_id):
     }
        
     res = requests.get(detail_url, params=params)
-    print(res.text)
     detail_json_dict = json.loads(res.text)
+    print(detail_json_dict)
     festival_detail = FestivalDetail(detail_json_dict['response']['body']['items']['item'][0])
     return festival_detail
     
@@ -203,13 +199,21 @@ def get_festival_event_info(content_id):
         'contentTypeId': '15',
     }
     contens_json_dict = json.loads(requests.get(url, params=params).text)
-    event_detail_list = []
-    item_list = contens_json_dict['response']['body']['items']['item']
-    for item in item_list:
-        event_detail = EventDetail(item)
-        event_detail_list.append(event_detail)
     
-    return (event_detail_list[0].infotext, event_detail_list[1].infotext)
+    event_sumamry = '' 
+    event_contents = '' 
+    
+    if contens_json_dict['response']['body']['items']:
+        item_list = contens_json_dict['response']['body']['items']['item']
+        for item in item_list:
+            event_detail = EventDetail(item)
+            
+            if event_detail.infoname == '행사소개':
+                event_sumamry = event_detail.infotext
+            elif event_detail.infoname == '행사내용':
+                event_contents = event_detail.infotext
+            
+    return (event_sumamry, event_contents)        
 
 def get_festival_additional_image(content_id):
     url = 'http://apis.data.go.kr/B551011/KorService1/detailImage1'
@@ -226,14 +230,16 @@ def get_festival_additional_image(content_id):
     }
     
     contens_json_dict = json.loads(requests.get(url, params=params).text)
-    item_list = contens_json_dict['response']['body']['items']['item']
     add_image_list = []
-    for item in item_list:
-        add_image = AddtionalImage(item)
-        add_image_list.append(add_image)
-    
-    return list(map(lambda x: x.originimgurl, add_image_list))
-
+    if contens_json_dict['response']['body']['items']:
+        item_list = contens_json_dict['response']['body']['items']['item']
+        for item in item_list:
+            add_image = AddtionalImage(item)
+            add_image_list.append(add_image)
+        return list(map(lambda x: x.originimgurl, add_image_list))
+    else:
+        return add_image_list
+         
 def main():    
     df = pd.DataFrame(columns=columns)
     df.to_csv('festival.csv', header=True, index=False, mode='w')

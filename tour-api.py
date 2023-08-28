@@ -4,66 +4,70 @@ import time
 import numpy as np
 import pandas as pd
 import requests
+import re
+
+reg_exp = '<.*?>|&lt;|&gt;|lt;|&nbsp;'
+
 
 #행사 정보 클래스
 class FestivalBase:
     def __init__(self, data):
-        self.addr1 = data['addr1']
-        self.addr2 = data['addr2']
-        self.booktour = data['booktour']
-        self.cat1 = data['cat1']
-        self.cat2 = data['cat2']
-        self.cat3 = data['cat3']
-        self.contentid = data['contentid']
-        self.contenttypeid = data['contenttypeid']
-        self.createdtime = data['createdtime']
-        self.eventstartdate = data['eventstartdate']
-        self.eventenddate = data['eventenddate']
-        self.firstimage = data['firstimage']
-        self.firstimage2 = data['firstimage2']
-        self.cpyrhtDivCd = data['cpyrhtDivCd']
-        self.mapx = data['mapx']
-        self.mapy = data['mapy']
-        self.mlevel = data['mlevel']
-        self.modifiedtime = data['modifiedtime']
-        self.areacode = data['areacode']
-        self.sigungucode = data['sigungucode']
-        self.tel = data['tel']
-        self.title = data['title']
+        self.addr1 = re.sub(reg_exp, '', data['addr1'])
+        self.addr2 = re.sub(reg_exp, '', data['addr2'])
+        self.booktour = re.sub(reg_exp, '', data['booktour'])
+        self.cat1 = re.sub(reg_exp, '', data['cat1'])
+        self.cat2 = re.sub(reg_exp, '', data['cat2'])
+        self.cat3 = re.sub(reg_exp, '', data['cat3'])
+        self.contentid = re.sub(reg_exp, '', data['contentid'])
+        self.contenttypeid = re.sub(reg_exp, '', data['contenttypeid'])
+        self.createdtime = re.sub(reg_exp, '', data['createdtime'])
+        self.eventstartdate = re.sub(reg_exp, '', data['eventstartdate'])
+        self.eventenddate = re.sub(reg_exp, '', data['eventenddate'])
+        self.firstimage = re.sub(reg_exp, '', data['firstimage'])
+        self.firstimage2 = re.sub(reg_exp, '', data['firstimage2'])
+        self.cpyrhtDivCd = re.sub(reg_exp, '', data['cpyrhtDivCd'])
+        self.mapx = re.sub(reg_exp, '', data['mapx'])
+        self.mapy = re.sub(reg_exp, '', data['mapy'])
+        self.mlevel = re.sub(reg_exp, '', data['mlevel'])
+        self.modifiedtime = re.sub(reg_exp, '', data['modifiedtime'])
+        self.areacode = re.sub(reg_exp, '', data['areacode'])
+        self.sigungucode = re.sub(reg_exp, '', data['sigungucode'])
+        self.tel = re.sub(reg_exp, '', data['tel'])
+        self.title = re.sub(reg_exp, '', data['title'])
         
 #행사 디테일정보 클래스
 class FestivalDetail:
     def __init__(self, data):
-        self.contentid = data['contentid']
-        self.contenttypeid = data['contenttypeid']
-        self.sponsor1 = data['sponsor1']
-        self.sponsor1tel = data['sponsor1tel']
-        self.sponsor2 = data['sponsor2']
-        self.sponsor2tel = data['sponsor2tel']
-        self.eventenddate = data['eventenddate']
-        self.playtime = data['playtime']
-        self.eventplace = data['eventplace']
-        self.eventhomepage = data['eventhomepage']
-        self.agelimit = data['agelimit']
-        self.bookingplace = data['bookingplace']
-        self.placeinfo = data['placeinfo']
-        self.subevent = data['subevent']
-        self.program = data['program']
-        self.eventstartdate = data['eventstartdate']
-        self.usetimefestival = data['usetimefestival']
-        self.discountinfofestival = data['discountinfofestival']
-        self.spendtimefestival = data['spendtimefestival']
-        self.festivalgrade = data['festivalgrade']
+        self.contentid = re.sub(reg_exp, '', data['contentid'])
+        self.contenttypeid = re.sub(reg_exp, '', data['contenttypeid'])
+        self.sponsor1 = re.sub(reg_exp, '', data['sponsor1'])
+        self.sponsor1tel = re.sub(reg_exp, '', data['sponsor1tel'])
+        self.sponsor2 = re.sub(reg_exp, '', data['sponsor2'])
+        self.sponsor2tel = re.sub(reg_exp, '', data['sponsor2tel'])
+        self.eventenddate = re.sub(reg_exp, '', data['eventenddate'])
+        self.playtime = re.sub(reg_exp, '', data['playtime'])
+        self.eventplace = re.sub(reg_exp, '', data['eventplace'])
+        self.eventhomepage = re.sub(reg_exp, '', data['eventhomepage'])
+        self.agelimit = re.sub(reg_exp, '', data['agelimit'])
+        self.bookingplace = re.sub(reg_exp, '', data['bookingplace'])
+        self.placeinfo = re.sub(reg_exp, '', data['placeinfo'])
+        self.subevent = re.sub(reg_exp, '', data['subevent'])
+        self.program = re.sub(reg_exp, '', data['program'])
+        self.eventstartdate = re.sub(reg_exp, '', data['eventstartdate'])
+        self.usetimefestival = re.sub(reg_exp, '', data['usetimefestival'])
+        self.discountinfofestival = re.sub(reg_exp, '', data['discountinfofestival'])
+        self.spendtimefestival = re.sub(reg_exp, '', data['spendtimefestival'])
+        self.festivalgrade = re.sub(reg_exp, '', data['festivalgrade'])
 
 class EventDetail:
     def __init__(self, data):
-        self.infotext = data['infotext']
-        self.serialnum = data['serialnum']
-        self.infoname = data['infoname']
+        self.infotext = re.sub(reg_exp, '', data['infotext'])
+        self.serialnum = re.sub(reg_exp, '', data['serialnum'])
+        self.infoname = re.sub(reg_exp, '', data['infoname'])
 
 class AddtionalImage:
     def __init__(self, data):
-        self.originimgurl = data['originimgurl']
+        self.originimgurl = re.sub(reg_exp, '', data['originimgurl'])
         
 columns = ['이름', 
             '주소', 
@@ -136,8 +140,8 @@ def get_performance_list(start_date, c_page, rows, to_get_total_page=False):
         df.loc[len(df)] = [festival.title,  # 이름
                         festival.addr1 + festival.addr2, # 주소
                         festival.tel, # 전화번호
-                        festival.mapx, # 위도
-                        festival.mapy, # 경도
+                        festival.mapy, # 위도
+                        festival.mapx, # 경도
                         festival_detail.usetimefestival, # 가격정보
                         festival_detail.placeinfo, # 장소정보(행사장 위치안내)
                         np.nan, # 주차난이도

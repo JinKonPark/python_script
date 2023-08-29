@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import requests
 import re
+from bs4 import BeautifulSoup
 
 reg_exp = '<.*?>|&lt;|&gt;|lt;|&nbsp;'
 
@@ -68,6 +69,18 @@ class EventDetail:
 class AddtionalImage:
     def __init__(self, data):
         self.originimgurl = re.sub(reg_exp, '', data['originimgurl'])
+
+class FestivalCommon:
+    def __init__(self, data):
+        self.contentid = data['contentid']
+        self.contenttypeid = data['contenttypeid']
+        self.title = data['title']
+        self.createdtime = data['createdtime']
+        self.modifiedtime = data['modifiedtime']
+        self.tel = data['tel']
+        self.telname = data['telname']
+        self.homepage = data['homepage']
+        self.booktour = data['booktour']
         
 columns = ['이름', 
             '주소', 
@@ -128,8 +141,25 @@ def get_performance_list(start_date, c_page, rows, to_get_total_page=False):
     
     ## 행사 리스트를 반복하면서 행사의 상세정보를 조회해서 dataframe에 추가 
     for item in json_dict['response']['body']['items']['item']:
+        #행사 기본 정보
         festival = FestivalBase(item)
+        
+        #행사 상세 정보
         festival_detail = get_festival_detail(festival.contentid)  
+        
+        #공통정보 가져오기
+        common = get_common_detail(festival.contentid) 
+        homepage_url = ''
+        
+        if common:
+            soup = BeautifulSoup(common.homepage, 'html.parser')
+            if soup :
+                try:
+                    # 링크 추출
+                    homepage_url = soup.a.get('href')
+                except:
+                    pass
+        
         # 반복정보 가져오기 
         (summary, description) = get_festival_event_info(festival.contentid) 
         
@@ -147,7 +177,7 @@ def get_performance_list(start_date, c_page, rows, to_get_total_page=False):
                         np.nan, # 주차난이도
                         np.nan, # 주차장 정보
                         np.nan, # 편의시설정보
-                        festival_detail.eventhomepage, #홈페이지 URL (TODO: 공통정보에서 가져온다.)
+                        homepage_url, #홈페이지 URL 
                         festival_detail.eventplace, # 장소이름
                         festival.firstimage, # 이미지 경로
                         festival.firstimage2, # 썸네일이미지 경로
@@ -243,6 +273,27 @@ def get_festival_additional_image(content_id):
         return list(map(lambda x: x.originimgurl, add_image_list))
     else:
         return add_image_list
+    
+
+def get_common_detail(content_id):
+    url = 'http://apis.data.go.kr/B551011/KorService1/detailCommon1'
+    
+    params = {
+        'serviceKey': f'{public_api_service_key}',
+        'MobileOS': 'ETC',
+        'MobileApp': 'AppTest',
+        '_type': 'json',
+        'contentId': f'{content_id}',
+        'contentTypeId': '15',
+        'defaultYN' : 'Y',
+    }
+    
+    contens_json_dict = json.loads(requests.get(url, params=params).text)
+    if contens_json_dict['response']['body']['items']:
+        return FestivalCommon(contens_json_dict['response']['body']['items']['item'][0])
+    else:
+        return None
+    
          
 def main():    
     df = pd.DataFrame(columns=columns)

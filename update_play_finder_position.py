@@ -4,12 +4,21 @@ import psycopg2
 service_key = "66ff875292132b326b974f47419cd0c3"
 url = "https://dapi.kakao.com/v2/local/search/address"
 
+
+dev_host = "main-dev.cluster-c5we8h1iqxur.ap-northeast-2.rds.amazonaws.com"
+beta_host = "main-beta.cluster-c5we8h1iqxur.ap-northeast-2.rds.amazonaws.com"
+prod_host = "main.cluster-c4npmqkr9mr7.ap-northeast-2.rds.amazonaws.com"
+user = "postgres"
+password = "kidsworld"
+
+host = dev_host
+
 ## Prod 환경의 DB 접속 정보 
 conn = psycopg2.connect(
-    host="main.cluster-c4npmqkr9mr7.ap-northeast-2.rds.amazonaws.com",
+    host=host,
     database="main",
-    user="postgres",
-    #password={{DB Password}},
+    user=user,
+    password=password,
 )
 
 # Kakao API를 이용하여 주소로부터 위경도 정보를 가져오는 함수
@@ -24,7 +33,7 @@ def getPosition(address):
             return None, None
     else:
         print("Error:", response.status_code)
-        return None
+        return None, None
 
 cur = conn.cursor()
 cur.execute("SELECT id, address FROM play_finder_site where address is not null and longitude is null and latitude is null")
